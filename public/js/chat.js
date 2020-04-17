@@ -10,23 +10,63 @@ const $messages = document.querySelector('#messages');
 //Templates
 const messageTemplate = document.querySelector('#message-template').innerHTML;
 const locationMessageTemplate = document.querySelector('#location-message-template').innerHTML;
+const sideBarTemplate = document.querySelector('#sidebar-template').innerHTML;
+
+//Options
+const { username, room } = Qs.parse(location.search, { ignoreQueryPrefix: true });
+
+const autoscroll = () => {
+    //New Message Element
+    const $newMessage = $messages.lastElementChild;
+
+    //Height of the new message
+    const newMessageStyles = getComputedStyle($newMessage);
+    const newMessageMargin = parseInt(newMessageStyles.marginBottom);
+    const newMessageHeight = $newMessage.offsetHeight + newMessageMargin;
+
+    //Visible Height
+    const visibleHeight = $messages.offsetHeight;
+
+    //Height of messages container
+    const containerHeight = $messages.scrollHeight;
+
+    //How far have I scrolled?
+    const scrollOffset = $messages.scrollTop + visibleHeight;
+
+    if(containerHeight - newMessageHeight <= scrollOffset){
+        $messages.scrollTop = $messages.scrollHeight
+    }
+}   
 
 socket.on('message', (message) => {
     console.log(message);
     const messageHTML = Mustache.render(messageTemplate, {
+        username: message.username,
         message: message.text,
         createdAt: moment(message.createdAt).format('h:mm a')
     });
     $messages.insertAdjacentHTML("beforeend", messageHTML);
+    autoscroll();
 });
 
 socket.on('locationMessage', (message) => {
     console.log(message);
     const locationHTML = Mustache.render(locationMessageTemplate, {
+        username: message.username,
         url: message.url,
         createdAt: moment(message.createdAt).format('h:mm a')
     });
     $messages.insertAdjacentHTML("beforeend", locationHTML);
+    autoscroll();
+});
+
+socket.on('roomData', ({ room, users }) => {
+    const sideBarHTML = Mustache.render(sideBarTemplate, {
+        room,
+        users
+    })
+
+    document.querySelector('#sidebar').innerHTML = sideBarHTML;
 });
 
 $messageForm.addEventListener('submit', (e) => {
@@ -63,4 +103,11 @@ $sendLocationButton.addEventListener('click', () => {
             console.log('Location shared!')
         });
     });
+});
+
+socket.emit('join', { username, room }, (error) => {
+    if (error) {
+        alert(error);
+        location.href = '/';
+    }
 });
