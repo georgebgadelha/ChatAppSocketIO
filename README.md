@@ -1,4 +1,4 @@
-# node-chat-app
+# ChatAppSocketIO
 Chat App using mostly Socket.io and Express to build it.
 
 The frontend part is built using EJS
@@ -7,3 +7,7 @@ The frontend part is built using EJS
 - Node JS
 - Express
 - Socket.io
+
+# Website
+You can check on the website example here: 
+https://gadelha-node-chat-app.herokuapp.com/
