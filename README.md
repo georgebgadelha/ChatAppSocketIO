@@ -7,4 +7,3 @@ The frontend part is built using EJS
 - Node JS
 - Express
 - Socket.io
-- EJS
